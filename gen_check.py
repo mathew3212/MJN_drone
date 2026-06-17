@@ -1,0 +1,1 @@
+import os`ndef wf(p,c):`n    os.makedirs(os.path.dirname(p),exist_ok=True)`n    with open(p,`w`,encoding=`utf-8`) as f: f.write(c.lstrip(chr(10)))`n    print(f`OK: {p}`)`n`nprint(`starting`)`nwf(`test_out.txt`,`hello`)`n
