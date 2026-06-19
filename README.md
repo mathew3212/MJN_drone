@@ -1,271 +1,299 @@
 # MJN Autonomous Drone Navigation System
 
-## Overview
-
-**MJN Drone** is a fully autonomous drone navigation and mission simulation system built in Python. It simulates a quadrotor drone navigating a 2D grid world (100×100 cells) from a start position to a target destination while avoiding static and dynamic obstacles. The system integrates **perception**, **mapping**, **planning**, **prediction**, **decision-making**, **control**, and **visualization** into a cohesive mission loop.
-
-The project is designed as a research-grade platform for testing autonomous navigation algorithms, sensor fusion techniques, cognitive architectures, and behavior-based mission execution. It also supports integration with **AirSim** (Microsoft's realistic drone simulator) via a dedicated bridge module.
+A fully autonomous drone navigation and mission simulation platform with both a **Python simulation engine** and a **Next.js command center dashboard**.
 
 ---
 
-## Architecture (Layers & Modules)
+## Table of Contents
 
-The system is organized into **11+ package directories** under `src/`, each representing a distinct architectural layer:
+- [Project Structure](#project-structure)
+- [Python Simulation (Backend)](#python-simulation-backend)
+  - [Prerequisites](#prerequisites)
+  - [Setup](#setup)
+  - [Running Simulations](#running-simulations)
+  - [Testing](#testing)
+  - [Architecture Overview](#architecture-overview)
+- [Drone Command Center (Web UI)](#drone-command-center-web-ui)
+  - [Prerequisites](#prerequisites-1)
+  - [Setup](#setup-1)
+  - [Running](#running)
+  - [Features](#features)
+- [Modules Reference](#modules-reference)
+- [Configuration](#configuration)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
+
+## Project Structure
 
 ```
 mjn_drone/
-├── main.py                     # Entry point: standard simulation
-├── main_airsim.py              # Entry point: AirSim simulation
+├── main.py                     # Entry point: standard 2D simulation
+├── main_premium.py             # Entry point: premium simulation (cinematic, living world, airspace)
+├── main_airsim.py              # Entry point: AirSim 3D simulation
 ├── requirements.txt            # Python dependencies
-├── src/
-│   ├── core/                   # Core simulation primitives
-│   ├── autonomy/               # Mission and behavior management
-│   ├── control/                # Flight controllers (PID, motion, flight manager)
-│   ├── navigation/             # Navigation state machine & local planners
-│   ├── planning/               # Path planners (D* Lite, grid, local, path follower, smoother)
-│   ├── mapping/                # Mapping (occupancy grid, cost map, spatial index, memory)
-│   ├── sensors/                # Virtual sensors (GPS, IMU, LiDAR, compass, camera, sensor fusion)
-│   ├── perception/             # Perception modules (future/planned)
-│   ├── prediction/             # Motion prediction (attention-based, learned, scene memory)
-│   ├── cognition/              # Cognitive architecture (world model, memory, attention, uncertainty, learning)
-│   ├── telemetry/              # Telemetry, metrics, visualization, dashboards
-│   ├── airsim/                 # AirSim integration bridge (world, drone, physics, sensors, mission)
-│   ├── tests/                  # Unit and integration tests
-│   └── __init__.py
 ├── benchmark_flight_manager.py # Performance benchmarking
-├── test_*.py                   # Various test scripts
+├── test_*.py                   # Test scripts (airsim, airspace, cognitive, dashboard, mission)
 ├── gen.py / gen_all.py / gen_check.py  # Code generation / validation utilities
-└── NAVIGATION_REPORT.md        # Navigation capabilities report
+├── .gitignore
+├── NAVIGATION_REPORT.md        # Navigation capabilities report
+│
+├── src/                        # Python simulation source
+│   ├── airsim/                 # AirSim integration bridge
+│   ├── airspace/               # Airspace management (geofence, altitude, corridors, restricted zones)
+│   ├── autonomy/               # Mission management, behavior trees, emergency, battery
+│   ├── cognition/              # Cognitive architecture (world model, memory, attention, learning)
+│   ├── control/                # PID, motion controller, flight manager
+│   ├── core/                   # Core primitives: drone, world, terrain, weather, event bus, physics
+│   ├── mapping/                # Occupancy grid, cost map, spatial index, memory map
+│   ├── navigation/             # Navigation state machine, managers, local planner
+│   ├── perception/             # Perception modules (extensible)
+│   ├── planning/               # Path planners: D* Lite, grid, local, path follower, smoother
+│   ├── prediction/             # Trajectory prediction, risk, attention predictors, training
+│   ├── sensors/                # GPS, IMU, LiDAR, compass, virtual camera, sensor fusion
+│   ├── telemetry/              # Metrics, logging, visualization, dashboards, military viz
+│   ├── tests/                  # Unit and integration tests
+│   ├── visuals/                # Premium world, camera system, vision engine, dashboard
+│   ├── workspace/              # Mission control workspace, brain integration, theme manager
+│   └── __init__.py
+│
+├── drone-command-center/       # Next.js web dashboard
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── next.config.ts
+│   ├── public/                 # Static assets
+│   └── src/
+│       ├── app/                # Next.js App Router pages
+│       │   ├── layout.tsx
+│       │   ├── page.tsx
+│       │   └── globals.css
+│       ├── components/
+│       │   ├── Dashboard.tsx
+│       │   ├── 3d/             # Three.js / React Three Fiber components
+│       │   │   ├── ErrorBoundary.tsx
+│       │   │   ├── MissionMapCanvas.tsx
+│       │   │   └── digital-twin/
+│       │   │       ├── DroneModel.tsx
+│       │   │       ├── TerrainMesh.tsx
+│       │   │       └── Buildings.tsx
+│       │   ├── charts/         # Chart components
+│       │   │   └── PremiumLineChart.tsx
+│       │   ├── layout/         # Layout components
+│       │   │   ├── StatusBar.tsx
+│       │   │   ├── EventConsole.tsx
+│       │   │   └── GlassPanel.tsx
+│       │   ├── panels/         # (extensible)
+│       │   └── widgets/        # (extensible)
+│       ├── hooks/              # (extensible)
+│       ├── lib/
+│       │   ├── theme.ts
+│       │   └── world/          # World generation utilities
+│       ├── store/              # State management (Zustand)
+│       │   └── droneStore.ts
+│       └── types/              # TypeScript definitions
+│           └── index.ts
+└── venv/                       # Python virtual environment (generated)
 ```
 
 ---
 
-## Key Features & Capabilities
+## Python Simulation (Backend)
 
-### 1. Core Simulation (`src/core/`)
-- **Drone Model (`drone.py`):** High-performance quadrotor simulation with continuous 2D dynamics tracking position (x, y), velocity (vx, vy), acceleration (ax, ay), jerk, yaw/heading angle, and speed.
-- **8 Flight Modes:** ECO, NORMAL, CRUISE, SPORT, TURBO, EMERGENCY, PRECISION, LANDING — each with configurable performance envelopes (max speed, acceleration, jerk, yaw rate, energy consumption).
-- **World Model (`world.py`, `enhanced_world.py`, `terrain.py`, `weather.py`):** 2D grid world with static obstacles, dynamic bouncing obstacles, terrain types, and weather conditions that affect drone performance.
-- **Grid Map (`grid_map.py`):** 100×100 cell grid with obstacle representation.
-- **Coordinate System (`coordinate_system.py`):** Coordinate transforms and conversions.
-- **Simulation Clock (`simulation_clock.py`):** Time management for deterministic simulation.
-- **Configuration (`configuration.py`):** Centralized configuration management.
+### Prerequisites
 
-### 2. Sensors (`src/sensors/`)
-- **GPS (`gps.py`):** Global positioning with configurable noise and drift.
-- **IMU (`imu.py`):** Inertial measurement unit with bias and noise models.
-- **LiDAR (`lidar.py`):** 360° ray-cast obstacle detection.
-- **Compass (`compass.py`):** Heading/magnetometer sensor.
-- **Virtual Camera (`virtual_camera.py`):** Simulated optical sensor.
-- **Sensor Fusion (`sensor_fusion.py`):** Kalman filter-based multi-sensor integration for state estimation.
+- **Python 3.10+**
+- **pip** (Python package manager)
+- Recommended: A virtual environment
 
-### 3. Mapping (`src/mapping/`)
-- **Occupancy Grid (`occupancy_grid.py`):** Probabilistic occupancy grid mapping from sensor data.
-- **Cost Map (`cost_map.py`):** Cost-based terrain representation for path planning.
-- **Spatial Index (`spatial_index.py`):** Efficient spatial queries (quadtree-based).
-- **Memory Manager (`memory_manager.py`):** Persistent map memory across missions.
-- **Obstacle Generator (`obstacle_generator.py`):** Dynamic obstacle generation.
-- **Collision Detector (`collision_detector.py`):** Collision prediction and detection.
+### Setup
 
-### 4. Planning (`src/planning/`)
-- **D* Lite (`dstar_lite.py`):** Incremental heuristic search algorithm for dynamic re-planning (optimal for environments with moving obstacles).
-- **Grid Planner (`grid_planner.py`):** A*/Dijkstra-based grid path search.
-- **Local Planner (`local_planner.py`):** Reactive obstacle avoidance (Velocity Obstacle / ORCA-like).
-- **Path Follower (`path_follower.py`):** Pure pursuit and carrot-chasing path tracking with lookahead.
-- **Path Smoother (`path_smoother.py`):** Trajectory smoothing (B-spline / gradient-based).
+```bash
+# Create and activate a virtual environment (recommended)
+python -m venv venv
+.\venv\Scripts\activate   # Windows
+source venv/bin/activate   # macOS/Linux
 
-### 5. Control (`src/control/`)
-- **PID Controller (`pid_controller.py`):** Multi-axis PID controller with anti-windup.
-- **Motion Controller (`motion_controller.py`):** High-level motion control interface.
-- **Flight Manager (`flight_manager.py`):** Centralized flight executive managing mode transitions, velocity/acceleration profiling, and control allocation.
+# Install dependencies
+pip install -r requirements.txt
+```
 
-### 6. Navigation (`src/navigation/`)
-- **Navigation State Machine (`navigation_state.py`, `navigation_manager.py`):** Manages navigation phases (INIT → TAKEOFF → NAVIGATE → AVOID → REACHED → LAND).
-- **Local Planner (`local_planner.py`):** Real-time local navigation and obstacle avoidance.
+### Running Simulations
 
-### 7. Autonomy (`src/autonomy/`)
-- **Mission Manager (`mission_manager.py`):** Orchestrates the full mission lifecycle — waypoint sequencing, replanning triggers, and mission status tracking.
-- **Emergency Manager (`emergency_manager.py`):** Safety layer handling collision threats, low battery, sensor failure, geofence violations with graded responses (WARN → ALERT → CRITICAL → EMERGENCY_STOP).
-- **Drone Behaviors (`drone_behaviors.py`):** Behavior tree-based autonomous behaviors (explore, track, avoid, return-to-home, etc.).
+There are three entry points, each for a different simulation mode:
 
-### 8. Prediction (`src/prediction/`)
-- **Attention Predictor (`attention_predictor.py`):** Transformer-based trajectory prediction using attention mechanisms.
-- **Learned Predictor (`learned_predictor.py`):** ML-based motion prediction for dynamic obstacles.
-- **Scene Memory (`scene_memory.py`):** Episodic memory for observed scenes.
-- **Training (`training.py`):** Training pipeline for prediction models.
-
-### 9. Cognition (`src/cognition/`)
-- **Cognitive Architecture (`cognitive_architecture.py`):** Integrated cognitive system combining world model, hierarchical memory, attention, uncertainty estimation, and learning.
-- **World Model (`world_model.py`):** Internal belief state representation.
-- **Hierarchical Memory (`hierarchical_memory.py`):** Multi-level memory (episodic, semantic, procedural).
-- **Attention (`attention.py`):** Selective attention mechanism.
-- **Uncertainty (`uncertainty.py`):** Bayesian uncertainty quantification.
-- **Probabilistic (`probabilistic.py`):** Probabilistic state estimation.
-- **Bayesian (`bayesian.py`):** Bayesian inference for belief updates.
-- **RL Interface (`rl_interface.py`):** Reinforcement learning interface.
-- **Mission Context (`mission_context.py`):** Mission-aware context management.
-- **Explainability (`explainability.py`):** Decision explanation generation.
-- **Adaptive Planner (`adaptive_planner.py`):** Self-adaptive planning strategies.
-- **Self Evaluation (`self_evaluation.py`):** Performance self-assessment.
-- **Confidence (`confidence.py`):** Confidence estimation for decisions.
-- **Learning (`learning.py`):** Online learning modules.
-
-### 10. AirSim Integration (`src/airsim/`)
-- **AirSim Bridge (`airsim_bridge.py`):** Connects the Python simulation to Microsoft AirSim for realistic 3D physics and visuals.
-- **AirSim Drone (`airsim_drone.py`):** AirSim quadrotor wrapper.
-- **AirSim World (`airsim_world.py`):** World synchronization.
-- **AirSim Sensors (`airsim_sensors.py`):** Sensor data from AirSim.
-- **AirSim Physics (`airsim_physics.py`):** Physics engine interface.
-- **AirSim Mission (`airsim_mission.py`):** Mission execution in AirSim.
-- **AirSim Config (`airsim_config.py`):** Configuration for AirSim connection.
-
-### 11. Telemetry & Visualization (`src/telemetry/`)
-- **Metrics (`metrics.py`):** Performance metrics collection (path length, time, energy, smoothness, etc.).
-- **Visualization (`visualization.py`):** Real-time grid world visualization (Pygame/Matplotlib).
-- **Flight Dashboard (`flight_dashboard.py`):** Interactive dashboard for monitoring.
-- **Military Viz (`military_viz.py`):** Specialized military-themed visualization.
-
----
-
-## Technologies Used
-
-| Technology | Purpose |
+| Command | Description |
 |---|---|
-| **Python 3.10+** | Core programming language |
-| **NumPy** | Numerical computing, linear algebra, state estimation |
-| **SciPy** | Signal processing, interpolation, optimization |
-| **Matplotlib** | Visualization, plotting |
-| **Pygame** | Interactive real-time 2D visualization |
-| **NetworkX** | Graph algorithms for path planning |
-| **PyTorch** | Deep learning for prediction and cognition |
-| **scikit-learn** | Classical ML for prediction |
-| **AirSim (Python API)** | Realistic 3D drone simulation (optional) |
-| **Pandas** | Data logging and analysis |
-| **B-spline / Interpolation** | Path smoothing |
-| **Kalman Filters** | Sensor fusion and state estimation |
-| **Behavior Trees** | Autonomous decision-making |
-| **D* Lite** | Incremental search for dynamic environments |
+| `python main.py` | Standard 2D grid world simulation. Runs a full autonomous mission with a single drone navigating from start to target, avoiding obstacles. Includes visualization, sensor simulation, path planning, and telemetry. |
+| `python main_premium.py` | Premium simulation with cinematic visuals, living world (vehicles, pedestrians, birds), airspace management, knowledge graph, event bus, multi-drone support, and an interactive workspace dashboard. Press `C` to cycle camera modes, `R` to reset. |
+| `python main_airsim.py` | AirSim 3D simulation. Connects to Microsoft AirSim for realistic physics and visuals. Falls back to 2D mode if AirSim is not available. Use `--no-airsim` to force 2D mode. |
 
----
+#### Additional Commands
 
-## How the Modules Interact
-
-The mission loop (in `main.py` / `src/autonomy/mission_manager.py`) follows this data flow:
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                     MISSION LOOP                                 │
-│                                                                   │
-│  Sensors (GPS, IMU, LiDAR, Compass)                              │
-│      │                                                            │
-│      ▼                                                            │
-│  Sensor Fusion ──► State Estimation (pos, vel, heading)         │
-│      │                                                            │
-│      ├──► Mapping (Occupancy Grid + Cost Map)                    │
-│      │       │                                                    │
-│      │       ▼                                                    │
-│      │   Spatial Index ──► Collision Detection                   │
-│      │       │                                                    │
-│      │       ▼                                                    │
-│      │   D* Lite / Grid Planner ◄── Prediction Module            │
-│      │       │         ▲            (dynamic obstacle forecasts)  │
-│      │       │         │                                          │
-│      │       ▼         │                                          │
-│      │   Path Smoother ─┘                                         │
-│      │       │                                                    │
-│      │       ▼                                                    │
-│      │   Path Follower (Pure Pursuit)                             │
-│      │       │                                                    │
-│      │       ▼                                                    │
-│      │   Local Planner (reactive avoidance)                       │
-│      │       │                                                    │
-│      ▼       ▼                                                    │
-│  Flight Manager ──► Mode Selection                               │
-│      │               (ECO / NORMAL / SPORT / etc.)                │
-│      │                                                            │
-│      ▼                                                            │
-│  PID Controller ──► Motion Controller                             │
-│      │                                                            │
-│      ▼                                                            │
-│  Drone Dynamics (position, velocity, acceleration update)        │
-│      │                                                            │
-│      ▼                                                            │
-│  Telemetry (metrics logging + visualization)                     │
-│      │                                                            │
-│      ▼                                                            │
-│  Emergency Manager (collision check, battery, geofence)          │
-│      │                                                            │
-│      ▼                                                            │
-│  Cognitive Architecture (optional loop)                          │
-│      │  - World Model update                                      │
-│      │  - Attention / Uncertainty / Confidence                    │
-│      │  - Adaptive Replanning                                     │
-│      │  - Self-Evaluation                                         │
-│      │                                                            │
-│      ▼                                                            │
-│  Mission Manager (waypoint progressing, replan triggers)          │
-│                                                                   │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### Key Interaction Points
-
-1. **Sensors → Sensor Fusion → State Estimation**: Raw sensor data is fused via Kalman filter to produce a reliable state estimate.
-
-2. **Mapping → Planning**: The occupancy grid and cost map provide the environment representation that planners use.
-
-3. **Prediction → Planning**: Dynamic obstacle trajectory predictions are fed into D* Lite to enable proactive replanning.
-
-4. **Planning → Control**: Path waypoints are sent to the Path Follower, which generates velocity/heading commands for the controllers.
-
-5. **Control → Drone**: PID and Motion Controllers compute actuation commands that update the drone's dynamics.
-
-6. **Drone → Sensors**: The drone's new state feeds back into sensor models (closed-loop simulation).
-
-7. **Emergency Manager → Flight Manager**: Safety-critical events trigger mode changes and override normal control.
-
-8. **Cognition → All Layers**: The cognitive architecture provides meta-reasoning, uncertainty-aware decision making, and adaptive behavior.
-
----
-
-## Running the Simulation
-
-### Standard Simulation (Python-only, no AirSim)
 ```bash
-python main.py
-```
-Runs the full autonomous mission in a 2D grid world with visualization.
+# Benchmark the flight manager performance
+python benchmark_flight_manager.py
 
-### AirSim Simulation (requires AirSim)
-```bash
-python main_airsim.py
+# Code generation utilities
+python gen.py          # Generate obstacle sets
+python gen_all.py      # Generate all test scenarios
+python gen_check.py    # Validate generated scenarios
 ```
-Runs the same mission in Microsoft AirSim's realistic 3D environment.
 
 ### Testing
+
 ```bash
-# Run specific tests
+# Run all unit tests
 python -m pytest src/tests/
 
-# Run individual test files
-python src/tests/test_planner.py
-python src/tests/test_flight_manager.py
-
-# Run dashboard
+# Run individual test scripts
+python test_airsim.py
+python test_airspace.py
+python test_cognitive.py
 python test_dashboard.py
+python test_mission.py
 
-# Run benchmarks
-python benchmark_flight_manager.py
+# Run specific module tests
+python -m pytest src/tests/test_planner.py
+python -m pytest src/tests/test_flight_manager.py
+python -m pytest src/tests/test_battery.py
+python -m pytest src/tests/test_behavior_tree.py
+python -m pytest src/tests/test_emergency.py
+python -m pytest src/tests/test_memory_manager.py
+python -m pytest src/tests/test_military_modules.py
 ```
+
+### Architecture Overview
+
+The system follows a layered robotics architecture:
+
+```
+Sensors → Sensor Fusion → State Estimation
+    ↓
+Mapping (Occupancy Grid + Cost Map)
+    ↓
+Planning (D* Lite / Grid Planner → Path Smoother → Path Follower)
+    ↓
+Control (PID → Motion Controller)
+    ↓
+Drone Dynamics
+    ↓
+Telemetry & Visualization
+    ↓
+Emergency Manager & Cognitive Architecture (feedback)
+    ↓
+Mission Manager (waypoint progression)
+```
+
+**Key modules:**
+- **`src/core/`**: Drone dynamics, world representation, terrain, weather, physics engine, event bus
+- **`src/sensors/`**: Virtual GPS, IMU, LiDAR, compass, camera with noise models and Kalman filter fusion
+- **`src/mapping/`**: Probabilistic occupancy grid, cost maps, spatial index, memory
+- **`src/planning/`**: D\* Lite incremental replanning, A\*/Dijkstra grid planner, local reactive avoidance, path smoothing
+- **`src/control/`**: PID controller with anti-windup, motion controller, flight mode manager
+- **`src/autonomy/`**: Behavior tree-based decision-making, emergency handling, battery management
+- **`src/cognition/`**: Cognitive architecture with world model, hierarchical memory, attention, uncertainty quantification
+- **`src/airspace/`**: Geofencing, altitude management, corridors, restricted zones, temporary restrictions
+- **`src/workspace/`**: Mission control workspace, brain integration, theme management
+- **`src/visuals/`**: Premium world rendering, cinematic camera system (10 modes), vision engine
 
 ---
 
-## Summary
+## Drone Command Center (Web UI)
 
-MJN Drone is a **comprehensive autonomous drone navigation research platform** that bridges:
+A modern Next.js dashboard for monitoring and controlling drone missions, featuring 3D digital twin visualization, real-time telemetry charts, and an interactive command interface.
 
-- **Classical robotics** (PID, D* Lite, occupancy grids, Kalman filters)
-- **Modern AI** (deep learning prediction, attention mechanisms, cognitive architectures)
-- **Simulation** (custom 2D grid world + Microsoft AirSim 3D integration)
+### Prerequisites
 
-It is designed to be modular, extensible, and well-suited for testing navigation algorithms, sensor configurations, planning strategies, and autonomous behaviors in a controlled simulation environment before deployment on real drone hardware.
+- **Node.js 18+**
+- **npm** (included with Node.js)
+
+### Setup
+
+```bash
+# Navigate to the command center directory
+cd drone-command-center
+
+# Install dependencies
+npm install
+```
+
+### Running
+
+```bash
+# Development server
+npm run dev
+
+# Production build
+npm run build
+npm start
+
+# Lint
+npm run lint
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Features
+
+- **3D Digital Twin**: Real-time 3D drone visualization using React Three Fiber with terrain mesh and buildings
+- **Live Telemetry**: Status bar showing drone position, battery, speed, and mission state
+- **Event Console**: Real-time log of mission events
+- **Interactive Charts**: Premium line charts for telemetry data visualization
+- **Glass Panel UI**: Modern glassmorphism design system with theme support
+- **Zustand State Management**: Efficient reactive state for drone data
+
+**Tech Stack:** Next.js 16, React 19, TypeScript, Three.js / React Three Fiber, Zustand, Recharts, Framer Motion, GSAP, Tailwind CSS
+
+---
+
+## Modules Reference
+
+| Package | Description |
+|---|---|
+| `src/core/` | Core simulation primitives: drone model, world, terrain, weather, grid map, coordinate system, simulation clock, configuration |
+| `src/sensors/` | Virtual sensors: GPS, IMU, LiDAR, compass, virtual camera, sensor engine, Kalman filter fusion |
+| `src/mapping/` | Mapping: occupancy grid, cost map, context map, perception map, memory manager, spatial index, collision detector |
+| `src/planning/` | Path planning: D\* Lite, grid planner (A\*), local planner, path follower, path smoother |
+| `src/control/` | Control: PID controller, motion controller, flight manager |
+| `src/navigation/` | Navigation: state machine, navigation manager, local planner |
+| `src/autonomy/` | Autonomy: mission manager, behavior tree, drone behaviors, emergency manager, battery manager |
+| `src/prediction/` | Prediction: trajectory predictor, attention predictor, learned predictor, risk predictor, scene memory, training |
+| `src/cognition/` | Cognition: cognitive architecture, world model, hierarchical memory, attention, uncertainty, bayesian, learning |
+| `src/airsim/` | AirSim integration: bridge, drone wrapper, world sync, sensors, physics, mission, config |
+| `src/airspace/` | Airspace: manager, geofence, altitude manager, corridors, restricted zones, database, visualization |
+| `src/telemetry/` | Telemetry: metrics, logger, visualization, flight dashboard, military visualization |
+| `src/visuals/` | Visuals: premium world, camera system, vision engine, cinematic flight, premium dashboard |
+| `src/workspace/` | Workspace: mission control workspace, brain integration, command palette, theme manager, layout profiles |
+| `src/tests/` | Tests: unit and integration tests for all major modules |
+
+---
+
+## Configuration
+
+Key configuration constants are defined at the top of each entry point:
+
+- **`main.py`**: `USE_DSTAR`, `SCAN_RADIUS`, `FRAME_DELAY`, `USE_ENHANCED_WORLD`, `WEATHER_CHANGE_INTERVAL`
+- **`main_premium.py`**: `PREMIUM_MODE`, `USE_LIVING_WORLD`, `USE_PHYSICS_ENGINE`, `WORLD_WIDTH`, `WORLD_HEIGHT`, `NUM_OBSTACLES`
+- **`main_airsim.py`**: Command-line arguments: `--ip`, `--port`, `--speed`, `--altitude`, `--scan-radius`, `--enable-weather`, `--wind-speed`, `--no-airsim`
+
+Additional configuration is available in:
+- `src/core/config.py` - Core simulation constants
+- `src/airsim/airsim_config.py` - AirSim connection parameters
+- `drone-command-center/next.config.ts` - Next.js configuration
+
+---
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
