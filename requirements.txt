@@ -27,6 +27,7 @@ pytest>=7.0.0
 # ---------
 colorama>=0.4.4
 Pillow>=9.0.0
+websockets>=11.0
 
 # =============================================================================
 # Premium Simulation Platform (all requirements satisfied by above)

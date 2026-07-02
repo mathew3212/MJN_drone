@@ -50,6 +50,7 @@ from src.control.pid_controller import PIDController
 from src.navigation.navigation_state import NavigationState
 from src.navigation.navigation_manager import NavigationManager
 from src.navigation.local_planner import LocalPlanner
+from src.telemetry.simulation_exporter import SimulationExporter
 
 # ── Configuration ──────────────────────────────────────────────────────────
 USE_DSTAR = False
@@ -319,6 +320,10 @@ def run_mission() -> tuple[Metrics, BatteryManager, int]:
     imu = IMUSensor()
     fusion = SensorFusion()
 
+    # ── Simulation Exporter (WebSocket → GCS) ─────────────────────
+    exporter = SimulationExporter(enabled=True)
+    print("💻 Simulation Exporter: listening on ws://localhost:8765")
+
     # ── Loop state ────────────────────────────────────────────────────
     step_counter = 0
     last_position: Optional[tuple] = None
@@ -527,6 +532,22 @@ def run_mission() -> tuple[Metrics, BatteryManager, int]:
         battery.update(
             distance_travelled=current_distance_moved,
             obstacle_count=len(visible_obstacles),
+        )
+
+        # ── Export to GCS (WebSocket) ──────────────────────────────
+        exporter.update(
+            drone=drone,
+            world=world,
+            battery_percentage=battery.percentage(),
+            battery_voltage=22.4,  # Nominal 6S LiPo
+            battery_current=3.2,
+            battery_temperature=45,
+            signal_strength=92,
+            gps_satellites=12,
+            gps_hdop=0.8,
+            gps_accuracy=1.0,
+            flight_mode=mission_manager.state,
+            status="ARMED",
         )
 
         # ── Metrics & logging ──────────────────────────────────────
