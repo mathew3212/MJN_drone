@@ -8,7 +8,7 @@
 // =============================================================================
 
 import L from 'leaflet';
-import { WaypointInfo, DroneEntity } from '@/types/droneEntity';
+import { WaypointInfo } from '@/types/droneEntity';
 
 interface WaypointLayer {
   marker: L.Marker;
@@ -47,7 +47,6 @@ export class WaypointRenderer {
 
       const isCurrent = i === currentWaypointIndex;
       const isCompleted = wp.reached && !isCurrent;
-      const isUpcoming = !wp.reached && !isCurrent;
 
       // Determine icon based on type
       const color = wp.type === 'home' ? '#A855F7'
@@ -148,7 +147,6 @@ export class WaypointRenderer {
   }
 
   private createLabelContent(wp: WaypointInfo, index: number, isCurrent: boolean): string {
-    const typeLabel = wp.type.toUpperCase();
     const etaLabel = wp.eta > 0 ? `${Math.floor(wp.eta / 60)}:${String(Math.round(wp.eta % 60)).padStart(2, '0')}` : '--:--';
     return `<div style="
       background: ${isCurrent ? 'rgba(0, 212, 255, 0.15)' : 'rgba(5, 5, 5, 0.75)'};

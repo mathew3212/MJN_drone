@@ -18,7 +18,6 @@ export default function IMUPanel() {
   const yaw = useDroneEntityStore((s) => s.drone.yaw);
   const pitch = useDroneEntityStore((s) => s.drone.pitch);
   const roll = useDroneEntityStore((s) => s.drone.roll);
-  const heading = useDroneEntityStore((s) => s.drone.heading);
   const imu = useDroneEntityStore((s) => s.drone.imu);
 
   return (

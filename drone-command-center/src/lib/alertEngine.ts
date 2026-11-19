@@ -16,6 +16,9 @@ import { useEventStore, EventSeverity, EventSource } from '@/store/eventStore';
 export interface AlertRule {
   id: string;
   condition: (drone: DroneEntity, previousDrone: DroneEntity | null) => boolean;
+  messageGen: (drone: DroneEntity) => string;
+  severity: EventSeverity;
+  source: EventSource;
   enabled: boolean;
   throttleMs: number; // Don't trigger the same alert more than once per this duration
   lastTriggered?: number;
@@ -213,15 +216,11 @@ export class AlertEngine {
     this.rules.set(id, {
       id,
       condition: config.condition,
+      messageGen: config.message,
+      severity: config.severity,
+      source: config.source,
       enabled: true,
       throttleMs: config.throttle,
-      // Store message generation for later
-      // @ts-ignore - storing function for later use
-      messageGen: config.message,
-      // @ts-ignore
-      severity: config.severity,
-      // @ts-ignore
-      source: config.source,
     });
   }
 
@@ -249,10 +248,7 @@ export class AlertEngine {
         if (shouldTrigger) {
           this.triggeredAlerts.set(ruleId, now);
           
-          // Get message and other properties
-          const messageGen = (rule as any).messageGen;
-          const severity = (rule as any).severity;
-          const source = (rule as any).source;
+          const { messageGen, severity, source } = rule;
           
           if (messageGen && severity && source) {
             const message = messageGen(drone);
@@ -262,7 +258,7 @@ export class AlertEngine {
               source,
               title: message.split(':')[0].trim(),
               description: message,
-              suggestedAction: this.getSuggestedAction(ruleId, drone),
+              suggestedAction: this.getSuggestedAction(ruleId),
               data: {
                 ruleId,
                 droneState: drone.missionState,
@@ -281,7 +277,7 @@ export class AlertEngine {
     this.previousDrone = drone;
   }
 
-  private getSuggestedAction(ruleId: string, drone: DroneEntity): string {
+  private getSuggestedAction(ruleId: string): string {
     const suggestions: Record<string, string> = {
       'battery-critical': 'Execute immediate RTL (Return To Launch)',
       'battery-low': 'Plan return within 3 minutes, RTL if battery < 10%',

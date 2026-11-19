@@ -9,8 +9,8 @@
 import { useRef, useEffect, useState } from 'react';
 import { useMapStore } from './MapStore';
 import { MapEngine, MapEngineStatus } from './MapEngine';
-import { tileProvider } from './TileProvider';
 import MapControls from './MapControls';
+import MapSearch from './MapSearch';
 import DebugPanel from './DebugPanel';
 import MissionPlayback from './MissionPlayback';
 
@@ -30,12 +30,6 @@ export default function GISMap() {
     engineRef.current = engine;
     setEngine(engine);
 
-    // Set Leaflet tile error handling
-    window.addEventListener('leaflet-tile-error', ((e: CustomEvent) => {
-      if (!running) return;
-      tileProvider.tryFallback(e.detail || 'Tile error');
-    }) as EventListener);
-
     engine.initialize({
       container,
       onStatusChange: (status: MapEngineStatus, msg: string) => {
@@ -48,20 +42,7 @@ export default function GISMap() {
       onTileError: (err: string) => {
         if (!running) return;
         console.warn('[GIS] Tile error:', err);
-        tileProvider.tryFallback(err).then((hasFallback) => {
-          if (!hasFallback && running) {
-            useMapStore.getState().setOfflineMode(true);
-            setEngineReady(true);
-            setEngineStatus('Tactical grid active');
-          } else if (hasFallback && running) {
-            const status = tileProvider.getStatus();
-            useMapStore.getState().setDebug({
-              provider: status.currentName,
-              providerIndex: status.currentIndex,
-            });
-            setEngineStatus(`Fallback: ${status.currentName}`);
-          }
-        });
+        engine.tryFallback(err);
       },
     });
 
@@ -96,6 +77,7 @@ export default function GISMap() {
       )}
 
       {/* Controls */}
+      <MapSearch engine={engine} />
       <MapControls engine={engine} />
 
       {/* Mission Playback */}

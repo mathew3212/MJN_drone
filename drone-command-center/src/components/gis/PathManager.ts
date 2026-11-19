@@ -7,7 +7,7 @@
 // =============================================================================
 
 import L from 'leaflet';
-import { DroneEntity, PathInfo } from '@/types/droneEntity';
+import { PathInfo } from '@/types/droneEntity';
 
 export type PathType = 'visited' | 'current' | 'planned' | 'returnHome' | 'emergency' | 'predicted';
 

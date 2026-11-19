@@ -21,7 +21,7 @@ export interface SystemEvent {
   title: string;
   description: string;
   suggestedAction?: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   resolved?: boolean;
   resolvedAt?: number;
 }

@@ -62,7 +62,8 @@ export class AIOverlayRenderer {
       ctx.beginPath();
       overlays.geofence.forEach((v, i) => {
         const [px, py] = toPixel(v.latitude, v.longitude);
-        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
       });
       ctx.closePath();
       ctx.fill();
@@ -82,7 +83,8 @@ export class AIOverlayRenderer {
       ctx.beginPath();
       nfz.vertices.forEach((v, i) => {
         const [px, py] = toPixel(v.latitude, v.longitude);
-        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
       });
       ctx.closePath();
       ctx.fill();
@@ -113,7 +115,8 @@ export class AIOverlayRenderer {
       ctx.beginPath();
       zone.vertices.forEach((v, i) => {
         const [px, py] = toPixel(v.latitude, v.longitude);
-        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
       });
       ctx.closePath();
       ctx.fill();

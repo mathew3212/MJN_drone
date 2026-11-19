@@ -9,7 +9,7 @@
 import { useDroneEntityStore } from './droneEntityStore';
 import { generateMission, GeneratedMission } from './missionGenerator';
 import {
-  DroneEntity, MissionState, PlannerType, HealthStatus, FlightStatus, WaypointInfo
+  MissionState, PlannerType, HealthStatus, FlightStatus
 } from '@/types/droneEntity';
 
 const EARTH_RADIUS = 6371000;
@@ -26,6 +26,7 @@ function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
 }
 
+type OperatorMode = 'normal' | 'returning' | 'landing' | 'emergency-landing';
 
 export class SimulationEngine {
   private running = false;
@@ -61,8 +62,9 @@ export class SimulationEngine {
   // Simulation speed multiplier
   public speedMultiplier = 1;
   private paused = false;
+  private operatorMode: OperatorMode = 'normal';
 
-  start() {
+  start(plannedMission?: GeneratedMission) {
     if (this.running) return;
     this.running = true;
     this.tickCount = 0;
@@ -70,8 +72,9 @@ export class SimulationEngine {
     this.windAngle = Math.random() * 360;
     this.windVariation = 0;
 
-    // Generate a unique mission for this run
-    this.mission = generateMission();
+    // Use the operator's validated plan when one is supplied; preserve the
+    // random generator for demos and regression testing.
+    this.mission = plannedMission ?? generateMission();
     this.currentLat = this.mission.homeLat;
     this.currentLng = this.mission.homeLng;
     this.currentAlt = this.mission.homeAlt;
@@ -84,6 +87,7 @@ export class SimulationEngine {
     this.totalDistanceFlown = 0;
     this.speedMultiplier = 1;
     this.paused = false;
+    this.operatorMode = 'normal';
 
     setTimeout(() => this.generateObstacles(), 3000);
     this.initializeStore();
@@ -109,6 +113,52 @@ export class SimulationEngine {
 
   setPaused(p: boolean) {
     this.paused = p;
+  }
+
+  commandTakeoff() {
+    if (!this.running) return;
+    this.operatorMode = 'normal';
+    this.paused = false;
+    useDroneEntityStore.getState().setDrone({
+      missionState: 'TAKEOFF',
+      status: 'NAVIGATE',
+      planner: { ...useDroneEntityStore.getState().drone.planner, decision: 'PROCEED', reason: 'Operator resumed the simulated flight' },
+    });
+  }
+
+  commandPause() {
+    if (!this.running || this.operatorMode === 'landing' || this.operatorMode === 'emergency-landing') return;
+    this.paused = true;
+    const drone = useDroneEntityStore.getState().drone;
+    useDroneEntityStore.getState().setDrone({
+      velocity: 0,
+      missionState: 'HOVER',
+      status: 'HOLD',
+      planner: { ...drone.planner, decision: 'HOLD', reason: 'Flight paused by the operator' },
+    });
+  }
+
+  commandResume() {
+    if (!this.running || this.operatorMode === 'landing' || this.operatorMode === 'emergency-landing') return;
+    this.paused = false;
+    const drone = useDroneEntityStore.getState().drone;
+    useDroneEntityStore.getState().setDrone({
+      missionState: this.operatorMode === 'returning' ? 'RETURN' : 'CRUISE',
+      status: this.operatorMode === 'returning' ? 'RETURN_HOME' : 'NAVIGATE',
+      planner: { ...drone.planner, decision: this.operatorMode === 'returning' ? 'RETURN_HOME' : 'PROCEED', reason: 'Flight resumed by the operator' },
+    });
+  }
+
+  commandReturnHome() {
+    if (!this.running) return;
+    this.operatorMode = 'returning';
+    this.paused = false;
+  }
+
+  commandLand(emergency = false) {
+    if (!this.running) return;
+    this.operatorMode = emergency ? 'emergency-landing' : 'landing';
+    this.paused = false;
   }
 
   setSpeed(speed: number) {
@@ -205,6 +255,16 @@ export class SimulationEngine {
     this.debugDt = dt;
     this.tickCount++;
     this.missionElapsed += dt;
+
+    if (this.operatorMode === 'returning') {
+      this.tickReturnHome(dt, now);
+      return;
+    }
+
+    if (this.operatorMode === 'landing' || this.operatorMode === 'emergency-landing') {
+      this.tickLanding(dt, now, this.operatorMode === 'emergency-landing');
+      return;
+    }
 
     // =========================================================================
     // 2. Environmental variables
@@ -357,7 +417,6 @@ export class SimulationEngine {
     // =========================================================================
     // 9. ETA and progress
     // =========================================================================
-    const remainingWps = waypoints.length - this.currentWaypointIdx;
     let remainingDist = 0;
     for (let i = this.currentWaypointIdx; i < waypoints.length - 1; i++) {
       remainingDist += haversine(waypoints[i].lat, waypoints[i].lng, waypoints[i + 1].lat, waypoints[i + 1].lng);
@@ -371,7 +430,6 @@ export class SimulationEngine {
     // 10. Commit to store
     // =========================================================================
     const distToHome = haversine(this.currentLat, this.currentLng, mission.homeLat, mission.homeLng);
-    const homeBearing = this.calculateBearing(this.currentLat, this.currentLng, mission.homeLat, mission.homeLng);
     const timeToHome = achievedVelocity > 0.1 ? distToHome / achievedVelocity : 300;
 
     const health: HealthStatus = batteryPercent < 20 ? 'WARN' : batteryPercent < 10 ? 'CRITICAL' : 'OK';
@@ -398,7 +456,7 @@ export class SimulationEngine {
         current: 3.2 * (achievedVelocity / mission.missionSpeed),
         power: 22.4 * (batteryPercent / 100) * (achievedVelocity / mission.missionSpeed),
         temperature: 30 + (100 - batteryPercent) * 0.2,
-        cells: Array.from({ length: 6 }, (_, i) => 4.2 * (batteryPercent / 100) + (Math.random() - 0.5) * 0.05),
+        cells: Array.from({ length: 6 }, () => 4.2 * (batteryPercent / 100) + (Math.random() - 0.5) * 0.05),
         health: Math.round(batteryHealth),
         cycles: 42,
       },
@@ -514,6 +572,88 @@ export class SimulationEngine {
       missionEta,
       missionId: mission.id,
       connected: true,
+      timestamp: now,
+    });
+  }
+
+  private tickReturnHome(dt: number, now: number) {
+    if (!this.mission) return;
+    const mission = this.mission;
+    const distanceToHome = haversine(this.currentLat, this.currentLng, mission.homeLat, mission.homeLng);
+    const targetSpeed = mission.missionSpeed * 1.15;
+    const moveDistance = Math.min(targetSpeed * dt, distanceToHome);
+    const fraction = distanceToHome > 0.001 ? moveDistance / distanceToHome : 0;
+    this.targetHeading = this.calculateBearing(this.currentLat, this.currentLng, mission.homeLat, mission.homeLng);
+    this.currentHeading += this.shortestAngleDiff(this.currentHeading, this.targetHeading) * Math.min(1, 4 * dt);
+    this.currentLat = lerp(this.currentLat, mission.homeLat, fraction);
+    this.currentLng = lerp(this.currentLng, mission.homeLng, fraction);
+    this.currentAlt = lerp(this.currentAlt, mission.homeAlt, Math.min(1, 2 * dt));
+    this.totalDistanceFlown += moveDistance;
+
+    const arrived = distanceToHome < 1.5;
+    if (arrived) {
+      this.currentLat = mission.homeLat;
+      this.currentLng = mission.homeLng;
+      this.currentAlt = mission.homeAlt;
+      this.paused = true;
+    }
+
+    const drone = useDroneEntityStore.getState().drone;
+    useDroneEntityStore.getState().setDrone({
+      latitude: this.currentLat,
+      longitude: this.currentLng,
+      altitude: this.currentAlt,
+      heading: this.currentHeading,
+      yaw: this.currentHeading,
+      velocity: arrived ? 0 : targetSpeed,
+      missionState: arrived ? 'COMPLETE' : 'RETURN',
+      status: arrived ? 'COMPLETE' : 'RETURN_HOME',
+      missionEta: arrived ? '00:00' : this.formatTime(distanceToHome / targetSpeed),
+      planner: {
+        ...drone.planner,
+        decision: arrived ? 'COMPLETE' : 'RETURN_HOME',
+        reason: arrived ? 'Drone returned to the starting point' : 'Returning to the starting point',
+      },
+      telemetry: {
+        ...drone.telemetry,
+        groundSpeed: arrived ? 0 : targetSpeed,
+        airSpeed: arrived ? 0 : targetSpeed,
+        distanceToHome: Math.max(0, distanceToHome - moveDistance),
+        timeToHome: arrived ? 0 : distanceToHome / targetSpeed,
+        flightTime: Math.round(this.missionElapsed),
+      },
+      path: {
+        ...drone.path,
+        visited: [...drone.path.visited, { latitude: this.currentLat, longitude: this.currentLng, altitude: this.currentAlt, timestamp: now }].slice(-500),
+        predicted: [{ latitude: mission.homeLat, longitude: mission.homeLng, altitude: mission.homeAlt }],
+      },
+      missionProgress: arrived ? 100 : drone.missionProgress,
+      timestamp: now,
+    });
+  }
+
+  private tickLanding(dt: number, now: number, emergency: boolean) {
+    const descentRate = emergency ? 16 : 7;
+    this.currentAlt = Math.max(0, this.currentAlt - descentRate * dt);
+    const landed = this.currentAlt <= 0.5;
+    if (landed) {
+      this.currentAlt = 0;
+      this.paused = true;
+    }
+
+    const drone = useDroneEntityStore.getState().drone;
+    useDroneEntityStore.getState().setDrone({
+      altitude: this.currentAlt,
+      velocity: 0,
+      verticalSpeed: landed ? 0 : -descentRate,
+      missionState: landed ? 'COMPLETE' : emergency ? 'EMERGENCY' : 'LAND',
+      status: landed ? 'COMPLETE' : emergency ? 'EMERGENCY' : 'LAND',
+      planner: {
+        ...drone.planner,
+        decision: landed ? 'COMPLETE' : emergency ? 'EMERGENCY_LAND' : 'LAND',
+        reason: landed ? 'Simulated flight finished safely' : emergency ? 'Emergency descent requested by operator' : 'Landing requested by operator',
+      },
+      telemetry: { ...drone.telemetry, groundSpeed: 0, airSpeed: 0, verticalSpeed: landed ? 0 : -descentRate, flightTime: Math.round(this.missionElapsed) },
       timestamp: now,
     });
   }

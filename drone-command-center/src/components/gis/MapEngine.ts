@@ -10,7 +10,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useMapStore } from './MapStore';
 import { useDroneEntityStore } from '@/store/droneEntityStore';
-import { tileProvider, TileSource, TILE_PROVIDERS } from './TileProvider';
+import { TileSource, TILE_PROVIDERS } from './TileProvider';
 import { LiveDroneMarker } from './LiveDroneMarker';
 import { PathManager } from './PathManager';
 import { WaypointRenderer } from './WaypointRenderer';
@@ -53,6 +53,9 @@ export class MapEngine {
   private unsubDroneStore: (() => void) | null = null;
   private lastDroneUpdate = 0;
   private selectedDroneId = 'MJN-01';
+  private isSwitchingProvider = false;
+  private userLocationMarker: L.CircleMarker | null = null;
+  private userAccuracyCircle: L.Circle | null = null;
 
   async initialize(config: MapEngineConfig): Promise<boolean> {
     this.container = config.container;
@@ -74,7 +77,9 @@ export class MapEngine {
       center: BANGALORE_CENTER,
       zoom: 15,
       zoomControl: false,
-      attributionControl: false,
+      // Keep the provider attribution visible.  Apart from being required by
+      // the providers, it makes the map behave like a normal consumer map.
+      attributionControl: true,
       fadeAnimation: true,
       zoomAnimation: true,
       markerZoomAnimation: true,
@@ -191,6 +196,12 @@ export class MapEngine {
       useMapStore.getState().incrementTileErrors();
     });
 
+    this.tileLayer.on('load', () => {
+      this.isSwitchingProvider = false;
+      useMapStore.getState().setOfflineMode(false);
+      this.setStatus('ready', `${source.name} loaded`);
+    });
+
     this.tileLayer.addTo(this.map);
   }
 
@@ -260,7 +271,6 @@ export class MapEngine {
     try {
       const center = this.map.getCenter();
       const zoom = this.map.getZoom();
-      const bounds = this.map.getBounds();
       const dpr = window.devicePixelRatio || 1;
       const w = this.canvasEl!.width / dpr;
       const h = this.canvasEl!.height / dpr;
@@ -389,20 +399,84 @@ export class MapEngine {
   }
 
   async tryFallback(error: string) {
+    // A failed viewport can emit an error for every individual tile. Switch
+    // only once, otherwise a single network hiccup would skip every provider.
+    if (this.isSwitchingProvider || this.destroyed) return;
+    this.isSwitchingProvider = true;
     this.providerIndex++;
     if (this.providerIndex >= TILE_PROVIDERS.length) {
       this.setStatus('offline', 'All tile providers failed - tactical mode');
       useMapStore.getState().setOfflineMode(true);
+      this.isSwitchingProvider = false;
       return;
     }
     const source = TILE_PROVIDERS[this.providerIndex];
     this.addTileLayer(source);
     useMapStore.getState().setDebug({ provider: source.name, providerIndex: this.providerIndex });
-    this.setStatus('fallback', `Falling back to ${source.name}`);
+    this.setStatus('fallback', `Falling back to ${source.name} after tile error: ${error}`);
   }
 
   setView(lat: number, lng: number, zoom: number) {
     if (this.map) this.map.setView([lat, lng], zoom, { animate: true, duration: 0.3 });
+  }
+
+  zoomBy(delta: number) {
+    if (!this.map) return;
+    this.map.setZoom(this.map.getZoom() + delta, { animate: true });
+  }
+
+  setBaseLayer(id: string) {
+    const index = TILE_PROVIDERS.findIndex((provider) => provider.id === id);
+    if (index < 0 || !this.map) return;
+    this.providerIndex = index;
+    this.isSwitchingProvider = false;
+    const source = TILE_PROVIDERS[index];
+    this.addTileLayer(source);
+    useMapStore.getState().setOfflineMode(false);
+    useMapStore.getState().setDebug({ provider: source.name, providerIndex: index });
+    this.setStatus('loading', `Loading ${source.name}...`);
+  }
+
+  fitMission() {
+    if (!this.map) return;
+    const drone = useDroneEntityStore.getState().drone;
+    const points: L.LatLngExpression[] = [
+      [drone.latitude, drone.longitude],
+      ...drone.waypoints.map((waypoint) => [waypoint.latitude, waypoint.longitude] as L.LatLngExpression),
+    ];
+    if (points.length > 1) this.map.fitBounds(L.latLngBounds(points), { padding: [48, 48], maxZoom: 16, animate: true });
+  }
+
+  async locateUser(): Promise<void> {
+    if (!this.map) throw new Error('Map is not ready');
+    if (!navigator.geolocation) throw new Error('Location is not supported by this browser');
+
+    const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        timeout: 10_000,
+        maximumAge: 30_000,
+      });
+    });
+    const { latitude, longitude, accuracy } = position.coords;
+    this.userLocationMarker?.remove();
+    this.userAccuracyCircle?.remove();
+    this.userAccuracyCircle = L.circle([latitude, longitude], {
+      radius: accuracy,
+      color: '#4285F4',
+      weight: 1,
+      fillColor: '#4285F4',
+      fillOpacity: 0.12,
+      interactive: false,
+    }).addTo(this.map);
+    this.userLocationMarker = L.circleMarker([latitude, longitude], {
+      radius: 7,
+      color: '#FFFFFF',
+      weight: 2,
+      fillColor: '#4285F4',
+      fillOpacity: 1,
+    }).addTo(this.map);
+    this.map.flyTo([latitude, longitude], Math.max(this.map.getZoom(), 15), { duration: 0.5 });
   }
 
   setFollowMode(mode: FollowMode) {
@@ -441,6 +515,8 @@ export class MapEngine {
     this.followController?.detach();
     this.liveDroneMarker?.detach();
     this.aiOverlayRenderer?.detach();
+    this.userLocationMarker?.remove();
+    this.userAccuracyCircle?.remove();
 
     if (this.map) {
       this.map.remove();

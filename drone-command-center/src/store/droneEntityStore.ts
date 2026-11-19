@@ -8,7 +8,7 @@
 // =============================================================================
 
 import { create } from 'zustand';
-import { DroneEntity, BackendType, FlightStatus, HealthStatus, MissionState, PlannerType } from '@/types/droneEntity';
+import { DroneEntity, BackendType } from '@/types/droneEntity';
 
 const BANGALORE_LAT = 12.9716;
 const BANGALORE_LNG = 77.5946;

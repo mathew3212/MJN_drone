@@ -7,7 +7,6 @@
 
 import { useMapStore } from './MapStore';
 import { useDroneEntityStore } from '@/store/droneEntityStore';
-import { tileProvider } from './TileProvider';
 
 export default function DebugPanel() {
   const debug = useMapStore((s) => s.debug);

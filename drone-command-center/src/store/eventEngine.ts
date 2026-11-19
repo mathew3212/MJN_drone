@@ -7,7 +7,7 @@
 // =============================================================================
 
 import { useDroneEntityStore } from './droneEntityStore';
-import { DroneEntity, MissionState, HealthStatus } from '@/types/droneEntity';
+import { MissionState, HealthStatus } from '@/types/droneEntity';
 
 export type EventSeverity = 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';
 
@@ -163,7 +163,6 @@ export function monitorStateChanges() {
   // Waypoint reached
   if (drone.currentWaypointIndex !== lastWaypointIndex && drone.currentWaypointIndex > 0) {
     const wp = drone.waypoints[drone.currentWaypointIndex];
-    const prevWp = drone.waypoints[lastWaypointIndex >= 0 ? lastWaypointIndex : 0];
     addEvent({
       severity: 'INFO',
       source: 'Navigation Engine',
@@ -216,7 +215,6 @@ export function monitorStateChanges() {
   }
 
   // Battery level thresholds
-  const batteryDrop = lastBatteryPercent - drone.battery.percentage;
   if (drone.battery.percentage < 30 && lastBatteryPercent >= 30) {
     addEvent({
       severity: 'WARNING',

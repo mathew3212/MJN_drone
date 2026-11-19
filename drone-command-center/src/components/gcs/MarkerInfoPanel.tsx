@@ -7,7 +7,7 @@
 // =============================================================================
 
 import { useEffect, useState } from 'react';
-import { X, Navigation, Home, Target, MapPin } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useDroneEntityStore } from '@/store/droneEntityStore';
 
 export type MarkerType = 'home' | 'destination' | 'drone' | 'waypoint' | 'emergency';
@@ -48,14 +48,27 @@ interface ResolvedAddress {
   city?: string;
 }
 
+interface ReverseGeocodeResponse {
+  display_name?: string;
+  address?: {
+    road?: string;
+    house_number?: string;
+    city?: string;
+    town?: string;
+    village?: string;
+  };
+}
+
 async function reverseGeocode(lat: number, lng: number): Promise<ResolvedAddress> {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 3_000);
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18`, {
       headers: { Accept: 'application/json' },
-      signal: AbortSignal.timeout?.(3000) as any,
+      signal: controller.signal,
     });
     if (!res.ok) throw new Error('Geocode failed');
-    const data = (await res.json()) as any;
+    const data = (await res.json()) as ReverseGeocodeResponse;
     const a: ResolvedAddress = {
       displayName: data.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
       road: data.address?.road,
@@ -70,24 +83,33 @@ async function reverseGeocode(lat: number, lng: number): Promise<ResolvedAddress
       houseNumber: undefined,
       city: 'Bangalore',
     };
+  } finally {
+    window.clearTimeout(timeout);
   }
 }
 
 export default function MarkerInfoPanel({ marker, onClose }: MarkerInfoPanelProps) {
   const drone = useDroneEntityStore((s) => s.drone);
   const [address, setAddress] = useState<ResolvedAddress | null>(null);
-  const [loadingAddress, setLoadingAddress] = useState(false);
+  const [resolvedMarkerKey, setResolvedMarkerKey] = useState('');
+  const markerKey = marker ? `${marker.latitude},${marker.longitude},${marker.type}` : '';
+  const loadingAddress = Boolean(marker && markerKey !== resolvedMarkerKey);
 
   useEffect(() => {
     if (!marker) return;
-    setLoadingAddress(true);
+    let cancelled = false;
+    const key = `${marker.latitude},${marker.longitude},${marker.type}`;
     reverseGeocode(marker.latitude, marker.longitude)
       .then((addr) => {
+        if (cancelled) return;
         setAddress(addr);
-        setLoadingAddress(false);
+        setResolvedMarkerKey(key);
       })
-      .catch(() => setLoadingAddress(false));
-  }, [marker?.latitude, marker?.longitude, marker?.type]);
+      .catch(() => {
+        if (!cancelled) setResolvedMarkerKey(key);
+      });
+    return () => { cancelled = true; };
+  }, [marker]);
 
   if (!marker) return null;
 

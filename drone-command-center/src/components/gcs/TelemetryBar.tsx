@@ -15,7 +15,6 @@ function formatTime(seconds: number): string {
 
 export default function TelemetryBar() {
   const telemetry = useDroneEntityStore((s) => s.drone.telemetry);
-  const velocity = useDroneEntityStore((s) => s.drone.velocity);
   const verticalSpeed = useDroneEntityStore((s) => s.drone.verticalSpeed);
 
   return (

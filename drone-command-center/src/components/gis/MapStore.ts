@@ -54,7 +54,7 @@ export interface MapStoreState {
   updateFromDroneEntity: (drone: DroneEntity) => void;
 }
 
-export const useMapStore = create<MapStoreState>((set, get) => ({
+export const useMapStore = create<MapStoreState>((set) => ({
   showDebug: false,
   showGeofences: true,
   showNoFlyZones: true,

@@ -88,14 +88,14 @@ export class MapFollowController {
       const zoom = this.map.getZoom();
       this.targetZoom = zoom;
 
-      // Google Maps style: drone at 35% from bottom
-      // Leaflet panTo centers, so we offset by calculating the pixel shift
+      // Keep the drone below centre, leaving more map visible in the direction
+      // of travel. Convert the desired screen point back to a geographic point
+      // so this is one smooth camera movement rather than competing pans.
       const mapSize = this.map.getSize();
-      const offsetPixels = L.point(0, Math.round(mapSize.y * 0.15)); // 15% offset up from center
-
-      this.map.panBy(offsetPixels, { animate: true, duration: 0.15 });
-
-      this.map.panTo([this.targetLat, this.targetLng], {
+      const targetPoint = this.map.project([this.targetLat, this.targetLng], zoom)
+        .subtract(L.point(0, Math.round(mapSize.y * 0.15)));
+      const cameraCenter = this.map.unproject(targetPoint, zoom);
+      this.map.panTo(cameraCenter, {
         animate: true,
         duration: 0.12,
         easeLinearity: 0.2,

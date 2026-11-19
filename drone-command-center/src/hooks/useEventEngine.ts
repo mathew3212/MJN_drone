@@ -5,7 +5,7 @@
 // =============================================================================
 
 import { useState, useEffect, useCallback } from 'react';
-import { eventEngine, EventEngineState, DroneEvent } from '@/store/eventEngine';
+import { eventEngine, EventEngineState } from '@/store/eventEngine';
 
 export function useEventEngine() {
   const [state, setState] = useState<EventEngineState>(eventEngine.getState());
