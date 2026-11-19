@@ -1,0 +1,283 @@
+- generic [active] [ref=f3e1]:
+  - button "Open Next.js Dev Tools" [ref=f3e8] [cursor=pointer]
+  - alert [ref=f3e12]
+  - generic [ref=f3e451]:
+    - banner [ref=f3e452]:
+      - generic [ref=f3e453]: MJN
+      - generic [ref=f3e456]:
+        - generic [ref=f3e457]: Mission
+        - generic [ref=f3e458]: MJN-QCH9M-PLAN
+      - generic [ref=f3e459]:
+        - generic [ref=f3e461]: Mode
+        - generic [ref=f3e462]: COMPLETE
+      - generic [ref=f3e464]: ONLINE
+      - generic [ref=f3e468]: GPS
+      - generic [ref=f3e469]: "13"
+      - generic [ref=f3e470]: WIND
+      - generic [ref=f3e471]: "8"
+      - generic [ref=f3e472]: BAT
+      - generic [ref=f3e473]: 100%
+      - generic [ref=f3e474]: 00:00:17
+      - generic [ref=f3e475]: 07:36:12 UTC
+      - button "Plan mission" [ref=f3e476]
+      - button "Events 9+" [ref=f3e477]:
+        - text: Events
+        - generic [ref=f3e478]: 9+
+    - generic [ref=f3e479]:
+      - complementary [ref=f3e480]:
+        - generic [ref=f3e481]:
+          - generic [ref=f3e482]:
+            - generic [ref=f3e483]: Drone
+            - generic [ref=f3e484]:
+              - generic [ref=f3e485]:
+                - generic [ref=f3e486]: ID
+                - generic [ref=f3e487]: MJN-01
+              - generic [ref=f3e488]:
+                - generic [ref=f3e489]: Status
+                - generic [ref=f3e490]: COMPLETE
+              - generic [ref=f3e491]:
+                - generic [ref=f3e492]: Health
+                - generic [ref=f3e493]: OK
+              - generic [ref=f3e494]:
+                - generic [ref=f3e495]: Speed
+                - generic [ref=f3e496]: 0.0m/s
+              - generic [ref=f3e497]:
+                - generic [ref=f3e498]: Alt
+                - generic [ref=f3e499]: 120m
+              - generic [ref=f3e500]:
+                - generic [ref=f3e501]: Heading
+                - generic [ref=f3e502]: 0°
+          - generic [ref=f3e503]:
+            - generic [ref=f3e504]: Battery
+            - generic [ref=f3e505]:
+              - generic [ref=f3e508]:
+                - generic [ref=f3e509]: Charge
+                - generic [ref=f3e510]: 100%
+              - generic [ref=f3e511]:
+                - generic [ref=f3e512]: Voltage
+                - generic [ref=f3e513]: 25.1V
+              - generic [ref=f3e514]:
+                - generic [ref=f3e515]: Current
+                - generic [ref=f3e516]: 0.0A
+              - generic [ref=f3e517]:
+                - generic [ref=f3e518]: Temp
+                - generic [ref=f3e519]: 30°C
+          - generic [ref=f3e520]:
+            - generic [ref=f3e521]: GPS
+            - generic [ref=f3e522]:
+              - generic [ref=f3e523]:
+                - generic [ref=f3e524]: Sats
+                - generic [ref=f3e525]: "13"
+              - generic [ref=f3e526]:
+                - generic [ref=f3e527]: HDOP
+                - generic [ref=f3e528]: "0.77"
+              - generic [ref=f3e529]:
+                - generic [ref=f3e530]: Fix
+                - generic [ref=f3e531]: RTK_FLOAT
+              - generic [ref=f3e532]:
+                - generic [ref=f3e533]: Lat
+                - generic [ref=f3e534]: "12.97180"
+              - generic [ref=f3e535]:
+                - generic [ref=f3e536]: Lng
+                - generic [ref=f3e537]: "77.59460"
+          - generic [ref=f3e538]:
+            - generic [ref=f3e539]: Signal
+            - generic [ref=f3e540]:
+              - generic [ref=f3e541]:
+                - generic [ref=f3e542]: Strength
+                - generic [ref=f3e543]: 91%
+              - generic [ref=f3e544]:
+                - generic [ref=f3e545]: RSSI
+                - generic [ref=f3e546]: "-67dBm"
+              - generic [ref=f3e547]:
+                - generic [ref=f3e548]: SNR
+                - generic [ref=f3e549]: 31dB
+          - generic [ref=f3e550]:
+            - generic [ref=f3e551]: System
+            - generic [ref=f3e552]:
+              - generic [ref=f3e553]:
+                - generic [ref=f3e554]: CPU
+                - generic [ref=f3e555]: 34%
+              - generic [ref=f3e556]:
+                - generic [ref=f3e557]: RAM
+                - generic [ref=f3e558]: 45%
+              - generic [ref=f3e559]:
+                - generic [ref=f3e560]: GPU
+                - generic [ref=f3e561]: 32%
+              - generic [ref=f3e562]:
+                - generic [ref=f3e563]: Hz
+                - generic [ref=f3e564]: "17"
+          - generic [ref=f3e565]:
+            - generic [ref=f3e566]: Weather
+            - generic [ref=f3e567]:
+              - generic [ref=f3e568]:
+                - generic [ref=f3e569]: Wind
+                - generic [ref=f3e570]: 8m/s
+              - generic [ref=f3e571]:
+                - generic [ref=f3e572]: Vis
+                - generic [ref=f3e573]: 15km
+              - generic [ref=f3e574]:
+                - generic [ref=f3e575]: Temp
+                - generic [ref=f3e576]: 22°C
+      - main [ref=f3e577]:
+        - generic [ref=f3e578]:
+          - generic: OpenStreetMap loaded
+          - generic [ref=f3e580]:
+            - textbox "Search for a place or coordinates" [ref=f3e581]:
+              - /placeholder: Search places or coordinates
+            - button "Search" [ref=f3e582]: ⌕
+          - generic [ref=f3e583]:
+            - button "Zoom in" [ref=f3e584]: +
+            - button "Zoom out" [ref=f3e585]: −
+          - generic [ref=f3e586]:
+            - button "Use my location" [ref=f3e587]: ◎
+            - button "Recenter on drone" [ref=f3e588]: ⌖
+            - button "Show full mission" [ref=f3e589]: ▱
+            - button "Choose map type" [ref=f3e591]: ▧
+          - button "PLAYBACK" [ref=f3e592]
+          - generic:
+            - generic:
+              - img:
+                - generic [ref=f3e593] [cursor=pointer]
+            - generic:
+              - button [ref=f3e594] [cursor=pointer]
+              - button [ref=f3e597] [cursor=pointer]
+            - generic:
+              - tooltip "START WP#0 120m ETA --:--":
+                - generic:
+                  - generic: START
+                  - generic:
+                    - generic: WP#0
+                    - generic: 120m
+                    - generic: ETA --:--
+              - tooltip "DESTINATION WP#1 120m ETA 0:01":
+                - generic:
+                  - generic: DESTINATION
+                  - generic:
+                    - generic: WP#1
+                    - generic: 120m
+                    - generic: ETA 0:01
+          - generic [ref=f3e601]:
+            - link "Leaflet" [ref=f3e602] [cursor=pointer]:
+              - /url: https://leafletjs.com
+            - text: "| ©"
+            - link "OpenStreetMap" [ref=f3e607] [cursor=pointer]:
+              - /url: https://openstreetmap.org
+            - text: contributors
+      - complementary [ref=f3e608]:
+        - generic [ref=f3e609]:
+          - generic [ref=f3e610]:
+            - generic [ref=f3e611]: Mission
+            - generic [ref=f3e612]:
+              - generic [ref=f3e613]:
+                - generic [ref=f3e614]: ID
+                - generic [ref=f3e615]: MJN-QCH9M-PLAN
+              - generic [ref=f3e616]:
+                - generic [ref=f3e617]: State
+                - generic [ref=f3e618]: COMPLETE
+              - generic [ref=f3e619]:
+                - generic [ref=f3e620]: Progress
+                - generic [ref=f3e621]: 100%
+              - generic [ref=f3e622]:
+                - generic [ref=f3e623]: ETA
+                - generic [ref=f3e624]: 00:00
+              - generic [ref=f3e625]:
+                - generic [ref=f3e626]: Planner
+                - generic [ref=f3e627]: AI-ROUTER
+              - generic [ref=f3e628]:
+                - generic [ref=f3e629]: Decision
+                - generic [ref=f3e630]: COMPLETE
+              - generic [ref=f3e631]:
+                - generic [ref=f3e632]: Confidence
+                - generic [ref=f3e633]: 90%
+          - generic [ref=f3e634]:
+            - generic [ref=f3e635]: Waypoint
+            - generic [ref=f3e636]:
+              - generic [ref=f3e637]:
+                - generic [ref=f3e638]: Current
+                - generic [ref=f3e639]: DESTINATION
+              - generic [ref=f3e640]:
+                - generic [ref=f3e641]: Dist
+                - generic [ref=f3e642]: 0m
+              - generic [ref=f3e643]:
+                - generic [ref=f3e644]: Remaining
+                - generic [ref=f3e645]: 0WPs
+              - generic [ref=f3e646]:
+                - generic [ref=f3e647]: To Home
+                - generic [ref=f3e648]: 22m
+              - generic [ref=f3e649]:
+                - generic [ref=f3e650]: ETA Home
+                - generic [ref=f3e651]: 300s
+          - generic [ref=f3e652]:
+            - generic [ref=f3e653]: Prediction
+            - generic [ref=f3e654]:
+              - generic [ref=f3e655]:
+                - generic [ref=f3e656]: Collision
+                - generic [ref=f3e657]: 3%
+              - generic [ref=f3e658]:
+                - generic [ref=f3e659]: Success
+                - generic [ref=f3e660]: 96%
+              - generic [ref=f3e661]:
+                - generic [ref=f3e662]: Risk
+                - generic [ref=f3e663]: 16%
+          - generic [ref=f3e664]:
+            - generic [ref=f3e665]: AI-ROUTER
+            - generic [ref=f3e668]:
+              - text: Decision
+              - generic [ref=f3e669]: COMPLETE
+              - generic [ref=f3e670]: Path clear, continuing mission
+            - generic [ref=f3e673]:
+              - generic [ref=f3e674]: Confidence
+              - generic [ref=f3e675]: 90%
+            - generic [ref=f3e678]:
+              - generic [ref=f3e679]:
+                - generic [ref=f3e680]: Obstacles
+                - generic [ref=f3e681]: "3"
+              - generic [ref=f3e682]:
+                - generic [ref=f3e683]: Collision Time
+                - generic [ref=f3e684]: N/A
+              - generic [ref=f3e685]:
+                - generic [ref=f3e686]: Risk Score
+                - generic [ref=f3e687]: 16%
+              - generic [ref=f3e688]:
+                - generic [ref=f3e689]: Success Prob
+                - generic [ref=f3e690]: 96%
+              - generic [ref=f3e691]:
+                - generic [ref=f3e692]: Path Cost
+                - generic [ref=f3e693]: "0.33"
+              - generic [ref=f3e694]:
+                - generic [ref=f3e695]: Planner Latency
+                - generic [ref=f3e696]: 18ms
+              - generic [ref=f3e697]:
+                - generic [ref=f3e698]: Inference Time
+                - generic [ref=f3e699]: 18ms
+              - generic [ref=f3e700]:
+                - generic [ref=f3e701]: Prediction Acc
+                - generic [ref=f3e702]: 88%
+            - generic [ref=f3e705]:
+              - generic [ref=f3e706]: Risk Score
+              - generic [ref=f3e707]: 16%
+            - generic [ref=f3e711]:
+              - generic [ref=f3e712]: Success Probability
+              - generic [ref=f3e713]: 96%
+          - button "Event Log 65" [ref=f3e716]:
+            - generic [ref=f3e717]: Event Log
+            - generic [ref=f3e718]: "65"
+    - contentinfo [ref=f3e719]:
+      - generic [ref=f3e726]:
+        - generic [ref=f3e727]: ALT
+        - generic [ref=f3e728]: "120"
+        - generic [ref=f3e729]: m
+      - generic [ref=f3e730]:
+        - generic [ref=f3e731]: SPD
+        - generic [ref=f3e732]: "0.0"
+        - generic [ref=f3e733]: m/s
+      - generic [ref=f3e734]:
+        - generic [ref=f3e735]: V/S
+        - generic [ref=f3e736]: "0.0"
+        - generic [ref=f3e737]: m/s
+      - generic [ref=f3e739]: SIG
+      - generic [ref=f3e743]:
+        - generic [ref=f3e744]: BAT
+        - generic [ref=f3e745]: "100"
+      - generic [ref=f3e749]: 100% · 0 WP remaining

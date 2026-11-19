@@ -1,0 +1,77 @@
+- generic [active] [ref=f2e1]:
+  - button "Open Next.js Dev Tools" [ref=f2e8] [cursor=pointer]
+  - alert [ref=f2e12]
+  - main [ref=f2e13]:
+    - generic [ref=f2e14]:
+      - generic [ref=f2e15]:
+        - paragraph [ref=f2e16]: MJN drone control
+        - heading "Plan a mission" [level=1] [ref=f2e17]
+        - paragraph [ref=f2e18]: Select each route point on the map, then review the flight check before launch.
+      - generic [ref=f2e19]:
+        - generic [ref=f2e20]:
+          - generic [ref=f2e21]: Find a place
+          - generic [ref=f2e22]:
+            - textbox "Find a place" [ref=f2e23]:
+              - /placeholder: Search an address or landmark
+              - text: Lalbagh Botanical Garden, Bengaluru
+            - button "Search" [ref=f2e24]
+        - generic [ref=f2e25]:
+          - generic [ref=f2e26]:
+            - button "Start point Nandyal, Nandyal Mandal, Nandyal District, Andhra Pradesh, 518501, India" [ref=f2e86]:
+              - generic [ref=f2e29]: Start point
+              - generic [ref=f2e30]: Nandyal, Nandyal Mandal, Nandyal District, Andhra Pradesh, 518501, India
+            - button "Clear Start point" [ref=f2e87]: ×
+          - generic [ref=f2e31]:
+            - button "Destination Kurnool, Kurnool Mandal, Kurnool District, Andhra Pradesh, 518001, India" [ref=f2e73]:
+              - generic [ref=f2e34]: Destination
+              - generic [ref=f2e35]: Kurnool, Kurnool Mandal, Kurnool District, Andhra Pradesh, 518001, India
+            - button "Clear Destination" [ref=f2e74]: ×
+          - generic [ref=f2e97]:
+            - button "Stop 1 Atal Bihari Botanical Garden, Kannamangala, Doddabanahalli, Bangalore East, Bengaluru Urban, Karnataka, India" [ref=f2e99]:
+              - generic [ref=f2e100]: Stop 1
+              - generic [ref=f2e101]: Atal Bihari Botanical Garden, Kannamangala, Doddabanahalli, Bangalore East, Bengaluru Urban, Karnataka, India
+            - button "Clear Stop 1" [ref=f2e102]: ×
+          - button "+ Add a stop, then click the map" [ref=f2e36]
+        - generic [ref=f2e37]:
+          - generic [ref=f2e38]:
+            - text: Mission name
+            - textbox "Mission name" [ref=f2e39]: Operator Planned Mission
+          - generic [ref=f2e40]:
+            - text: Altitude (m)
+            - spinbutton "Altitude (m)" [ref=f2e41]: "120"
+          - generic [ref=f2e42]:
+            - text: Cruise speed (m/s)
+            - spinbutton "Cruise speed (m/s)" [ref=f2e43]: "12"
+          - generic [ref=f2e44]:
+            - generic [ref=f2e45]: Route distance
+            - text: 595.74 km
+        - generic [ref=f2e46]:
+          - paragraph [ref=f2e47]: Flight check needs attention
+          - list [ref=f2e48]:
+            - listitem [ref=f2e88]: • Route exceeds the simulator’s 6.5 km safe operating range.
+            - listitem [ref=f2e103]: • Route needs 7154% battery; keep at least 15% reserve.
+      - generic [ref=f2e51]:
+        - paragraph [ref=f2e52]: Simulator validation only. Do not use this interface to command a real aircraft without approved airspace, vehicle, and safety systems.
+        - button "Launch validated mission" [disabled] [ref=f2e53]
+    - region "Mission planning map" [ref=f2e54]:
+      - generic [ref=f2e55]:
+        - generic:
+          - generic:
+            - img:
+              - generic [ref=f2e104] [cursor=pointer]
+          - generic:
+            - button "S" [ref=f2e105] [cursor=pointer]
+            - button "1" [ref=f2e108] [cursor=pointer]
+            - button "D" [ref=f2e111] [cursor=pointer]
+        - generic:
+          - generic:
+            - generic [ref=f2e56]:
+              - button "Zoom in" [ref=f2e57] [cursor=pointer]: +
+              - button "Zoom out" [ref=f2e58] [cursor=pointer]: −
+            - generic [ref=f2e59]:
+              - link "Leaflet" [ref=f2e60] [cursor=pointer]:
+                - /url: https://leafletjs.com
+              - text: "| © OpenStreetMap contributors"
+      - generic:
+        - text: "Selecting:"
+        - strong: a stop

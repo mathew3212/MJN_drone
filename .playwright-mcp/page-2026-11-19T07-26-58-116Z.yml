@@ -1,0 +1,309 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]: MJN
+      - generic [ref=e7]:
+        - generic [ref=e8]: Mission
+        - generic [ref=e9]: MJN-8594-POWE
+      - generic [ref=e10]:
+        - generic [ref=e12]: Mode
+        - generic [ref=e13]: CRUISE
+      - generic [ref=e15]: ONLINE
+      - generic [ref=e19]: GPS
+      - generic [ref=e20]: "14"
+      - generic [ref=e21]: WIND
+      - generic [ref=e22]: "8"
+      - generic [ref=e23]: BAT
+      - generic [ref=e24]: 87%
+      - generic [ref=e25]: 00:02:03
+      - generic [ref=e26]: 07:26:57 UTC
+      - button "Events 9+" [ref=e278]:
+        - text: Events
+        - generic [ref=e279]: 9+
+    - generic [ref=e28]:
+      - complementary [ref=e29]:
+        - generic [ref=e30]:
+          - generic [ref=e31]:
+            - generic [ref=e32]: Drone
+            - generic [ref=e33]:
+              - generic [ref=e34]:
+                - generic [ref=e35]: ID
+                - generic [ref=e36]: MJN-01
+              - generic [ref=e37]:
+                - generic [ref=e38]: Status
+                - generic [ref=e39]: NAVIGATE
+              - generic [ref=e40]:
+                - generic [ref=e41]: Health
+                - generic [ref=e42]: OK
+              - generic [ref=e43]:
+                - generic [ref=e44]: Speed
+                - generic [ref=e45]: 9.3m/s
+              - generic [ref=e46]:
+                - generic [ref=e47]: Alt
+                - generic [ref=e48]: 87m
+              - generic [ref=e49]:
+                - generic [ref=e50]: Heading
+                - generic [ref=e51]: 139°
+          - generic [ref=e52]:
+            - generic [ref=e53]: Battery
+            - generic [ref=e54]:
+              - generic [ref=e57]:
+                - generic [ref=e58]: Charge
+                - generic [ref=e59]: 87%
+              - generic [ref=e60]:
+                - generic [ref=e61]: Voltage
+                - generic [ref=e62]: 22.0V
+              - generic [ref=e63]:
+                - generic [ref=e64]: Current
+                - generic [ref=e65]: 3.2A
+              - generic [ref=e66]:
+                - generic [ref=e67]: Temp
+                - generic [ref=e68]: 33°C
+          - generic [ref=e69]:
+            - generic [ref=e70]: GPS
+            - generic [ref=e71]:
+              - generic [ref=e72]:
+                - generic [ref=e73]: Sats
+                - generic [ref=e74]: "14"
+              - generic [ref=e75]:
+                - generic [ref=e76]: HDOP
+                - generic [ref=e77]: "0.87"
+              - generic [ref=e78]:
+                - generic [ref=e79]: Fix
+                - generic [ref=e80]: RTK_FLOAT
+              - generic [ref=e81]:
+                - generic [ref=e82]: Lat
+                - generic [ref=e83]: "12.99292"
+              - generic [ref=e84]:
+                - generic [ref=e85]: Lng
+                - generic [ref=e86]: "77.61474"
+          - generic [ref=e87]:
+            - generic [ref=e88]: Signal
+            - generic [ref=e89]:
+              - generic [ref=e90]:
+                - generic [ref=e91]: Strength
+                - generic [ref=e92]: 93%
+              - generic [ref=e93]:
+                - generic [ref=e94]: RSSI
+                - generic [ref=e95]: "-68dBm"
+              - generic [ref=e96]:
+                - generic [ref=e97]: SNR
+                - generic [ref=e98]: 33dB
+          - generic [ref=e99]:
+            - generic [ref=e100]: System
+            - generic [ref=e101]:
+              - generic [ref=e102]:
+                - generic [ref=e103]: CPU
+                - generic [ref=e104]: 33%
+              - generic [ref=e105]:
+                - generic [ref=e106]: RAM
+                - generic [ref=e107]: 46%
+              - generic [ref=e108]:
+                - generic [ref=e109]: GPU
+                - generic [ref=e110]: 27%
+              - generic [ref=e111]:
+                - generic [ref=e112]: Hz
+                - generic [ref=e113]: "18"
+          - generic [ref=e114]:
+            - generic [ref=e115]: Weather
+            - generic [ref=e116]:
+              - generic [ref=e117]:
+                - generic [ref=e118]: Wind
+                - generic [ref=e119]: 8m/s
+              - generic [ref=e120]:
+                - generic [ref=e121]: Vis
+                - generic [ref=e122]: 13km
+              - generic [ref=e123]:
+                - generic [ref=e124]: Temp
+                - generic [ref=e125]: 21°C
+      - main [ref=e126]:
+        - generic [ref=e280]:
+          - generic: Esri Satellite loaded
+          - generic [ref=e282]:
+            - textbox "Search for a place or coordinates" [active] [ref=e283]:
+              - /placeholder: Search places or coordinates
+              - text: 12.9716, 77.5946
+            - button "Search" [ref=e284]: ⌕
+          - generic [ref=e285]:
+            - button "Zoom in" [ref=e286]: +
+            - button "Zoom out" [ref=e287]: −
+          - generic [ref=e288]:
+            - button "Use my location" [ref=e289]: ◎
+            - button "Recenter on drone" [ref=e290]: ⌖
+            - button "Show full mission" [ref=e291]: ▱
+            - button "Choose map type" [ref=e293]: ▧
+          - button "PLAYBACK" [ref=e294]
+          - generic:
+            - generic:
+              - button [ref=e298] [cursor=pointer]
+              - button [ref=e301] [cursor=pointer]
+              - button [ref=e305] [cursor=pointer]
+              - button [ref=e310] [cursor=pointer]
+              - button [ref=e314] [cursor=pointer]
+              - button [ref=e318] [cursor=pointer]
+            - generic:
+              - tooltip "HOME WP#0 87m ETA --:--":
+                - generic:
+                  - generic: HOME
+                  - generic:
+                    - generic: WP#0
+                    - generic: 87m
+                    - generic: ETA --:--
+              - tooltip "POLE-01 WP#1 87m ETA 0:50":
+                - generic:
+                  - generic: POLE-01
+                  - generic:
+                    - generic: WP#1
+                    - generic: 87m
+                    - generic: ETA 0:50
+              - tooltip "POLE-02 WP#2 87m ETA 1:39":
+                - generic:
+                  - generic: POLE-02
+                  - generic:
+                    - generic: WP#2
+                    - generic: 87m
+                    - generic: ETA 1:39
+              - tooltip "POLE-03 WP#3 87m ETA 2:29":
+                - generic:
+                  - generic: POLE-03
+                  - generic:
+                    - generic: WP#3
+                    - generic: 87m
+                    - generic: ETA 2:29
+              - tooltip "POLE-04 WP#4 87m ETA 3:19":
+                - generic:
+                  - generic: POLE-04
+                  - generic:
+                    - generic: WP#4
+                    - generic: 87m
+                    - generic: ETA 3:19
+              - tooltip "RTH WP#5 87m ETA 4:08":
+                - generic:
+                  - generic: RTH
+                  - generic:
+                    - generic: WP#5
+                    - generic: 87m
+                    - generic: ETA 4:08
+          - generic [ref=e321]:
+            - link "Leaflet" [ref=e425] [cursor=pointer]:
+              - /url: https://leafletjs.com
+            - text: "| © Esri, Maxar, Earthstar Geographics"
+      - complementary [ref=e128]:
+        - generic [ref=e129]:
+          - generic [ref=e130]:
+            - generic [ref=e131]: Mission
+            - generic [ref=e132]:
+              - generic [ref=e133]:
+                - generic [ref=e134]: ID
+                - generic [ref=e135]: MJN-8594-POWE
+              - generic [ref=e136]:
+                - generic [ref=e137]: State
+                - generic [ref=e138]: CRUISE
+              - generic [ref=e139]:
+                - generic [ref=e140]: Progress
+                - generic [ref=e141]: 38%
+              - generic [ref=e142]:
+                - generic [ref=e143]: ETA
+                - generic [ref=e144]: 00:02
+              - generic [ref=e145]:
+                - generic [ref=e146]: Planner
+                - generic [ref=e147]: AI-ROUTER
+              - generic [ref=e148]:
+                - generic [ref=e149]: Decision
+                - generic [ref=e150]: PROCEED
+              - generic [ref=e151]:
+                - generic [ref=e152]: Confidence
+                - generic [ref=e153]: 87%
+          - generic [ref=e154]:
+            - generic [ref=e155]: Waypoint
+            - generic [ref=e156]:
+              - generic [ref=e157]:
+                - generic [ref=e158]: Current
+                - generic [ref=e159]: POLE-04
+              - generic [ref=e160]:
+                - generic [ref=e161]: Dist
+                - generic [ref=e162]: 322m
+              - generic [ref=e163]:
+                - generic [ref=e164]: Remaining
+                - generic [ref=e165]: 1WPs
+              - generic [ref=e166]:
+                - generic [ref=e167]: To Home
+                - generic [ref=e168]: 1072m
+              - generic [ref=e169]:
+                - generic [ref=e170]: ETA Home
+                - generic [ref=e171]: 115s
+          - generic [ref=e172]:
+            - generic [ref=e173]: Prediction
+            - generic [ref=e174]:
+              - generic [ref=e175]:
+                - generic [ref=e176]: Collision
+                - generic [ref=e177]: 2%
+              - generic [ref=e178]:
+                - generic [ref=e179]: Success
+                - generic [ref=e180]: 87%
+              - generic [ref=e181]:
+                - generic [ref=e182]: Risk
+                - generic [ref=e183]: 15%
+          - generic [ref=e184]:
+            - generic [ref=e185]: AI-ROUTER
+            - generic [ref=e188]:
+              - text: Decision
+              - generic [ref=e189]: PROCEED
+              - generic [ref=e190]: Path clear, continuing mission
+            - generic [ref=e193]:
+              - generic [ref=e194]: Confidence
+              - generic [ref=e195]: 87%
+            - generic [ref=e198]:
+              - generic [ref=e199]:
+                - generic [ref=e200]: Obstacles
+                - generic [ref=e201]: "3"
+              - generic [ref=e202]:
+                - generic [ref=e203]: Collision Time
+                - generic [ref=e204]: N/A
+              - generic [ref=e205]:
+                - generic [ref=e206]: Risk Score
+                - generic [ref=e207]: 15%
+              - generic [ref=e208]:
+                - generic [ref=e209]: Success Prob
+                - generic [ref=e210]: 87%
+              - generic [ref=e211]:
+                - generic [ref=e212]: Path Cost
+                - generic [ref=e213]: "0.34"
+              - generic [ref=e214]:
+                - generic [ref=e215]: Planner Latency
+                - generic [ref=e216]: 21ms
+              - generic [ref=e217]:
+                - generic [ref=e218]: Inference Time
+                - generic [ref=e219]: 21ms
+              - generic [ref=e220]:
+                - generic [ref=e221]: Prediction Acc
+                - generic [ref=e222]: 91%
+            - generic [ref=e225]:
+              - generic [ref=e226]: Risk Score
+              - generic [ref=e227]: 15%
+            - generic [ref=e231]:
+              - generic [ref=e232]: Success Probability
+              - generic [ref=e233]: 87%
+          - button "Event Log 467" [ref=e448]:
+            - generic [ref=e237]: Event Log
+            - generic [ref=e329]: "467"
+    - contentinfo [ref=e238]:
+      - generic [ref=e245]:
+        - generic [ref=e246]: ALT
+        - generic [ref=e247]: "87"
+        - generic [ref=e248]: m
+      - generic [ref=e249]:
+        - generic [ref=e250]: SPD
+        - generic [ref=e251]: "9.3"
+        - generic [ref=e252]: m/s
+      - generic [ref=e253]:
+        - generic [ref=e254]: V/S
+        - generic [ref=e255]: "0.0"
+        - generic [ref=e256]: m/s
+      - generic [ref=e258]: SIG
+      - generic [ref=e262]:
+        - generic [ref=e263]: BAT
+        - generic [ref=e264]: "87"
+      - generic [ref=e268]: 38% · 1 WP remaining
+  - button "Open Next.js Dev Tools" [ref=e274] [cursor=pointer]
+  - alert [ref=e330]
